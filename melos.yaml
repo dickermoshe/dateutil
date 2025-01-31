@@ -1,0 +1,8 @@
+name: dateutils
+
+packages:
+  - .
+
+scripts:
+  prepare: |
+    npm install -g @tubular/time-tzdb && npx tzc --large test/utils/timezone.json -o && melos bootstrap && dart .\tools\generate_windows_tz_mappings.dart
