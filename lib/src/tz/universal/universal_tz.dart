@@ -1,6 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:math' as math;
-
 import 'package:b/b.dart';
 import 'package:embed_annotation/embed_annotation.dart';
 import 'package:equatable/equatable.dart';
@@ -160,7 +157,17 @@ class UniversalTimezone extends BaseTimezone with EquatableMixin {
   ///
   /// This will expose what year to test for.
   @visibleForTesting
-  int? get lastYear => _localTimeTypes.lastOrNull?.utcOffset60;
+  int? get lastYear {
+    if (_transitionDeltas == null) {
+      return null;
+    }
+
+    return DateTime.fromMillisecondsSinceEpoch(
+      _transitionDeltas.fold<int>(
+          0, (previousValue, element) => previousValue + element),
+      isUtc: true,
+    ).year;
+  }
 
   UniversalTimezone._(this.id, this._basic, this._localTimeTypes,
       this._lttIndex60, this._transitionDeltas, this._dstRule);
@@ -255,10 +262,10 @@ class UniversalTimezone extends BaseTimezone with EquatableMixin {
       final (ruleA, ruleB) = _transitionsFor(currentYear);
       final firstRule = (ruleA.transition < ruleB.transition ? ruleA : ruleB);
       final secondRule = (ruleA.transition > ruleB.transition ? ruleA : ruleB);
-      print(millisecondsSinceEpoch);
-      print(firstRule.transition);
-      print(secondRule.transition);
-      print("----");
+      // print(millisecondsSinceEpoch);
+      // print(firstRule.transition);
+      // print(secondRule.transition);
+      // print("----");
       if (millisecondsSinceEpoch >= firstRule.transition &&
           millisecondsSinceEpoch < secondRule.transition) {
         return _basic.currentStdUtcOffset + firstRule.save;
@@ -309,6 +316,8 @@ class UniversalTimezone extends BaseTimezone with EquatableMixin {
   }
 
   (_DstRule, _DstRule) _transitionsFor(int year) {
+    // print(_dstRule);
+
     /// The `_dstRule` contains two parts, the standard time rule and the
     /// daylight saving time rule. The two rules are separated by a comma.
     final parts = _dstRule!.split(",");
@@ -322,7 +331,7 @@ class UniversalTimezone extends BaseTimezone with EquatableMixin {
         currentYear: year,
         rawRule: parts[1],
         stdOffset: _basic.currentStdUtcOffset,
-        dstOffset: _basic.currentDstOffset);
+        dstOffset: 0);
     return (ruleA, ruleB);
   }
 
@@ -408,11 +417,15 @@ class _DstRule {
       // dayOfWeek is 0-indexed starting from Sunday.
       // However we need to convert it to 1-indexed starting from Monday.
       var effectiveDayOfWeek = _dayOfWeek - 1;
-      effectiveDayOfWeek = effectiveDayOfWeek == 0 ? 7 : _dayOfWeek;
+      effectiveDayOfWeek = effectiveDayOfWeek == 0 ? 7 : effectiveDayOfWeek;
 
       // Find the next dayOfWeek after the dayOfMonth.
       while (tempDate.weekday != effectiveDayOfWeek) {
-        tempDate = tempDate.add(const Duration(days: 1));
+        if (_dayOfMonth < 0) {
+          tempDate = tempDate.subtract(const Duration(days: 1));
+        } else {
+          tempDate = tempDate.add(const Duration(days: 1));
+        }
       }
 
       millis = DateTime.utc(year, _month, tempDate.day, _atHour, _atMinute)
@@ -421,7 +434,8 @@ class _DstRule {
       /// if dayOfMonth is 0, then we find the last day of the month
       /// that is the dayOfWeek.
       var effectiveDayOfWeek = _dayOfWeek - 1;
-      effectiveDayOfWeek = effectiveDayOfWeek == 0 ? 7 : _dayOfWeek;
+      effectiveDayOfWeek = effectiveDayOfWeek == 0 ? 7 : effectiveDayOfWeek;
+
       // Start from the last day of the month and go backwards until we find
       // the dayOfWeek.
       var tempDate =
@@ -447,7 +461,6 @@ class _DstRule {
     } else if (_atType == 1) {
       millis -= stdOffset;
     }
-    print(DateTime.fromMillisecondsSinceEpoch(millis, isUtc: true));
     return millis;
   }
 }

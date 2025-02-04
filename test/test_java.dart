@@ -21,7 +21,7 @@ void main() {
     final sharedTimezones =
         androidTimeZones.toSet().intersection(windowsTimeZones.toSet());
 
-    sharedTimezones.removeWhere((element) => element.startsWith('SystemV/'));
+    sharedTimezones.removeWhere((element) => !element.startsWith('SystemV/'));
 
     for (var timezone in sharedTimezones) {
       group("timezone $timezone", () {
@@ -33,21 +33,32 @@ void main() {
         // 2. AC Years before years we have timezone data for
         // 3. Years we have timezone data for
         // 4. Years we have timezone data for after 2038
-        // 5. Years we have timezone data for after 2500
+        // 5. Years we dont have timezone data for after 2200
         final years = [
-          // ...uniqueYears(random.nextInt(20)),
-          // ...uniqueYears(random.nextInt(20) - 100),
-          // ...uniqueYears(random.nextInt(20) + 1950),
-          // ...uniqueYears(random.nextInt(20) + 2000),
-          // ...uniqueYears(random.nextInt(20) + 1900),
-          // ...uniqueYears(random.nextInt(20) + 2038),
-          ...uniqueYears(2501),
+          ...uniqueYears(random.nextInt(20)),
+          ...uniqueYears(random.nextInt(20) - 100),
+          ...uniqueYears(random.nextInt(20) + 1950),
+          ...uniqueYears(random.nextInt(20) + 2000),
+          ...uniqueYears(random.nextInt(20) + 1900),
+          ...uniqueYears(random.nextInt(20) + 2038),
+          ...uniqueYears(random.nextInt(20) + 2200),
         ];
+
+        /// We also want to test the years when we run out of trasition deltas
+        /// and are using dstrules to calculate the offset
+        if (winTz.lastYear case int endYear) {
+          years.add(endYear - 2);
+          years.add(endYear - 1);
+          years.add(endYear);
+          years.add(endYear + 1);
+          years.add(endYear + 2);
+          years.add(endYear + 3);
+        }
 
         for (var year in years) {
           test(year, () {
             expect(winTz.id, andTz.id);
-            var dt = DateTime.utc(year, 3, 29);
+            var dt = DateTime.utc(year, 6, 1);
             while (dt.year < year + 1) {
               final winOffset = winTz.offset(dt.millisecondsSinceEpoch);
               final andOffset = andTz.offset(dt.millisecondsSinceEpoch);

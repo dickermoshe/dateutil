@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:dateutil/src/tz/android/bindings.dart';
 import 'package:dateutil/src/tz/shared.dart';
 import 'package:equatable/equatable.dart';
