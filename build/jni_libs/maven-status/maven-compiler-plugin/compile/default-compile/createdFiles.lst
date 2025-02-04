@@ -1,0 +1,7 @@
+com\github\dart_lang\jni\PortCleaner.class
+com\github\dart_lang\jni\PortContinuation.class
+com\github\dart_lang\jni\PortProxyBuilder$DartImplementation.class
+com\github\dart_lang\jni\JniUtils.class
+com\github\dart_lang\jni\PortProxyBuilder$DartException.class
+com\github\dart_lang\jni\PortProxyBuilder.class
+com\github\dart_lang\jni\PortCleaner$PortPhantom.class
