@@ -1,38 +1,40 @@
-import 'package:dateutil/src/tz/android/bindings.dart';
-import 'package:dateutil/src/tz/shared.dart';
 import 'package:equatable/equatable.dart';
 import 'package:jni/jni.dart';
 import 'package:meta/meta.dart';
 
-Set<String> getTimeZonesNames() {
-  final jNames = ZoneId.getAvailableZoneIds();
-  final names =
-      jNames!.toList().map((e) => e!.toDartString(releaseOriginal: true));
-  jNames.release();
-  return names.toSet();
-}
+import '../shared.dart';
+import 'bindings.dart';
 
-JavaTimezone getTimeZoneByName(String name) {
-  final jTz = JString.fromString(name).use((name) => ZoneId.of$1(name));
-  if (jTz == null) {
-    throw TimezoneNotFoundException(name);
+/// A factory that provides access to the Java timezone database.
+class JavaTimezoneFactory extends TimezoneFactory<JavaTimezone> {
+  @override
+  JavaTimezone getTimezone(String id) {
+    return JavaTimezone(id);
   }
-  final id = jTz.getId()!.toDartString(releaseOriginal: true);
-  jTz.release();
-  return JavaTimezone(id);
+
+  @override
+  Set<String> listTimezoneIds() {
+    final jNames = ZoneId.getAvailableZoneIds();
+    final names = jNames!.toList().map(
+          (e) => e!.toDartString(releaseOriginal: true),
+        );
+    jNames.release();
+    return names.toSet();
+  }
 }
 
 @Immutable()
+
+/// A timezone that uses the Java timezone database.
 class JavaTimezone extends BaseTimezone with EquatableMixin {
-  @override
-  final String id;
-  JavaTimezone(this.id);
+  /// Creates a new Java timezone with the given [id].
+  const JavaTimezone(super.id);
 
   @override
   int offset(int millisecondsSinceEpoch) {
     final instant = Instant.ofEpochMilli(millisecondsSinceEpoch);
     final result = JString.fromString(id)
-        .use((name) => ZoneId.of$1(name))!
+        .use(ZoneId.of$1)!
         .use((p0) => ZonedDateTime.ofInstant(instant, p0))!
         .use((p0) => p0.getOffset()!.use((offset) => offset.getTotalSeconds()));
     instant!.release();

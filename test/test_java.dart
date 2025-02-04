@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:dateutil/src/tz/android/android_tz.dart' as and;
+import 'package:dateutil/src/tz/shared.dart';
 import 'package:dateutil/src/tz/universal/universal_tz.dart' as win;
 
 import 'package:jni/jni.dart';
@@ -12,21 +13,22 @@ import 'utils/unique_years.dart';
 
 void main() {
   final random = Random();
-  group("java", () {
+  group('java', () {
     Jni.spawn(
-      dylibDir: join(Directory.current.path, "build", "jni_libs"),
+      dylibDir: join(Directory.current.path, 'build', 'jni_libs'),
     );
-    final windowsTimeZones = win.getTimeZonesNames().toList();
-    final androidTimeZones = and.getTimeZonesNames().toList();
+    final androidTimeZoneProvider = TimezoneProvider(and.JavaTimezoneFactory());
+    final androidTimeZones = androidTimeZoneProvider.listTimezoneIds();
+    final windowsTimeZonesProvider =
+        TimezoneProvider(win.UniversalTimezoneFactory());
+    final windowsTimeZones = windowsTimeZonesProvider.listTimezoneIds();
     final sharedTimezones =
         androidTimeZones.toSet().intersection(windowsTimeZones.toSet());
 
-    sharedTimezones.removeWhere((element) => !element.startsWith('SystemV/'));
-
-    for (var timezone in sharedTimezones) {
-      group("timezone $timezone", () {
-        final winTz = win.getTimeZoneByName(timezone);
-        final andTz = and.getTimeZoneByName(timezone);
+    for (final timezone in sharedTimezones) {
+      group('timezone $timezone', () {
+        final winTz = windowsTimeZonesProvider.getTimezone(timezone);
+        final andTz = androidTimeZoneProvider.getTimezone(timezone);
 
         // We test all the possible years:
         // 1. BC Years
@@ -44,21 +46,26 @@ void main() {
           ...uniqueYears(random.nextInt(20) + 2200),
         ];
 
-        /// We also want to test the years when we run out of trasition deltas
-        /// and are using dstrules to calculate the offset
-        if (winTz.lastYear case int endYear) {
+        if (winTz.lastYear case final int endYear) {
           years.add(endYear - 2);
           years.add(endYear - 1);
           years.add(endYear);
           years.add(endYear + 1);
           years.add(endYear + 2);
-          years.add(endYear + 3);
         }
 
-        for (var year in years) {
+        if (winTz.firstYear case final int firstYear) {
+          years.add(firstYear - 2);
+          years.add(firstYear - 1);
+          years.add(firstYear);
+          years.add(firstYear + 1);
+          years.add(firstYear + 2);
+        }
+
+        for (final year in years) {
           test(year, () {
             expect(winTz.id, andTz.id);
-            var dt = DateTime.utc(year, 6, 1);
+            var dt = DateTime.utc(year, 6);
             while (dt.year < year + 1) {
               final winOffset = winTz.offset(dt.millisecondsSinceEpoch);
               final andOffset = andTz.offset(dt.millisecondsSinceEpoch);
@@ -66,9 +73,9 @@ void main() {
               expect(
                 winOffset,
                 andOffset,
-                reason: "Date: $dt, WinOffset:$winOffset, AndOffset:$andOffset",
+                reason: 'Date: $dt, WinOffset:$winOffset, AndOffset:$andOffset',
               );
-              dt = dt.add(Duration(minutes: 30));
+              dt = dt.add(const Duration(minutes: 30));
             }
           });
         }

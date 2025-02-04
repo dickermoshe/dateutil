@@ -1,34 +1,74 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:equatable/equatable.dart';
+import 'package:meta/meta.dart';
 
-class TimezoneSpan extends Equatable {
-  /// Microseconds since the epoch this span starts at.
-  final BigInt start;
+abstract class TimezoneFactory<TZ extends BaseTimezone> {
+  Set<String>? cachedTimezoneNames;
+  final Map<String, TZ> cachedTimezones = {};
+  Set<String> listTimezoneIds();
+  TZ getTimezone(String id);
+}
 
-  /// Microseconds since the epoch this span ends at.
-  final BigInt end;
+/// Base class for all timezones providers.
+@immutable
+class TimezoneProvider<TZ extends BaseTimezone> {
+  final TimezoneFactory<TZ> _factory;
+  const TimezoneProvider(this._factory);
+  Set<String> listTimezoneIds() {
+    /// If the timezone names are already cached, return them.
+    if (_factory.cachedTimezoneNames != null) {
+      return _factory.cachedTimezoneNames!;
+    }
 
-  /// The timezone abbreviation for this span.
-  /// e.g. "EST", "EDT", "PST", "PDT"
-  final String abbreviation;
+    /// Otherwise, fetch the timezone names and cache them.
+    final names = _factory.listTimezoneIds();
 
-  /// The offset from UTC in seconds.
-  final BigInt offset;
+    // We ignore SystemV timezones as they are not
+    // supported by the tubular_time_tzdb project
+    names.removeWhere((element) => element.startsWith('SystemV/'));
 
-  /// Whether this span is in daylight saving time.
-  final bool isDst;
-  TimezoneSpan({
-    required this.start,
-    required this.end,
-    required this.abbreviation,
-    required this.offset,
-    required this.isDst,
-  });
+    _factory.cachedTimezoneNames = names;
+    return names;
+  }
+
+  TZ getTimezone(String id) {
+    /// If the timezone is already cached, return it.
+    if (listTimezoneIds().contains(id)) {
+      return _factory.cachedTimezones[id]!;
+    }
+
+    /// If the timezone is not found, throw an exception.
+    if (!listTimezoneIds().contains(id)) {
+      throw TimezoneNotFoundException(id);
+    }
+
+    /// Otherwise, fetch the timezone and cache it.
+    final result = _factory.getTimezone(id);
+    _factory.cachedTimezones[id] = result;
+    return result;
+  }
 
   @override
-  List<Object?> get props => [start, end, abbreviation, offset, isDst];
+  String toString() {
+    return 'TimezoneProvider($_factory)';
+  }
+}
+
+@immutable
+abstract class BaseTimezone with EquatableMixin {
+  const BaseTimezone(this.id);
+
+  /// A unique identifier for this timezone.
+  final String id;
+
+  /// Returns the offset in milliseconds for the timezone at the given
+  /// [millisecondsSinceEpoch].
+  int offset(int millisecondsSinceEpoch);
+
   @override
   bool? get stringify => true;
+  @override
+  List<Object?> get props => [id];
 }
 
 class TimezoneNotFoundException implements Exception {
@@ -39,53 +79,4 @@ class TimezoneNotFoundException implements Exception {
   @override
   String toString() =>
       'TimezoneNotFoundException: Timezone "$timezoneName" not found';
-}
-
-class Offset extends Equatable {
-  /// The offset that this timezone is currently at.
-  /// For instance the offset for New York is -5 hours
-  /// during standard time. However during daylight saving time,
-  /// the offset will be -4 hours.
-  ///
-  /// The returned value is in milliseconds.
-  final int offset;
-
-  /// If this is currently in daylight saving time, this will be the offset
-  /// from the standard offset.
-  /// For instance, when New York is in daylight saving time, the offset will be -1 hour.
-  /// However during standard time, the offset will be null
-  ///
-  /// The returned value is in milliseconds.
-  final int? dstDelta;
-  const Offset._({
-    required this.offset,
-    required this.dstDelta,
-  });
-
-  factory Offset({required int offset, required int? dstDelta}) {
-    return Offset._(offset: offset, dstDelta: dstDelta == 0 ? null : dstDelta);
-  }
-
-  @override
-  List<Object?> get props => [offset, dstDelta];
-
-  @override
-  bool? get stringify => true;
-}
-
-abstract class BaseTimezone {
-  const BaseTimezone();
-
-  /// A unique identifier for this timezone.
-  String get id;
-
-  /// Returns an [Offset] object representing the time zone offset at the given
-  /// [millisecondsSinceEpoch].
-  ///
-  /// The [millisecondsSinceEpoch] parameter is the number of milliseconds
-  /// since the Unix epoch (January 1, 1970, 00:00:00 UTC).
-  ///
-  /// This method calculates the offset based on the provided timestamp and
-  /// returns it as an [Offset] object.
-  int offset(int millisecondsSinceEpoch);
 }

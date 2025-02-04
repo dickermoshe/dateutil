@@ -1,0 +1,9 @@
+output: lib/src/tz/unix/bindings.dart
+name: TZData
+description: TZData bindings for Dart.
+headers:
+  entry-points:
+    - time.h
+functions:
+  include:
+    - "tzset"
