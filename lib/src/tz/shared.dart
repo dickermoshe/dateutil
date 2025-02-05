@@ -3,54 +3,51 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 abstract class TimezoneFactory<TZ extends BaseTimezone> {
+  String get name;
   Set<String>? cachedTimezoneNames;
   final Map<String, TZ> cachedTimezones = {};
-  Set<String> listTimezoneIds();
+  // Set<String> listTimezoneIds();
   TZ getTimezone(String id);
 }
 
 /// Base class for all timezones providers.
 @immutable
-class TimezoneProvider<TZ extends BaseTimezone> {
-  final TimezoneFactory<TZ> _factory;
-  const TimezoneProvider(this._factory);
-  Set<String> listTimezoneIds() {
-    /// If the timezone names are already cached, return them.
-    if (_factory.cachedTimezoneNames != null) {
-      return _factory.cachedTimezoneNames!;
-    }
+class TimezoneProvider<TZ extends BaseTimezone,
+    TzFactory extends TimezoneFactory<TZ>> {
+  final TzFactory $factory;
+  const TimezoneProvider(this.$factory);
+  // Set<String> listTimezoneIds() {
+  //   /// If the timezone names are already cached, return them.
+  //   if (_factory.cachedTimezoneNames != null) {
+  //     return _factory.cachedTimezoneNames!;
+  //   }
 
-    /// Otherwise, fetch the timezone names and cache them.
-    final names = _factory.listTimezoneIds();
+  //   /// Otherwise, fetch the timezone names and cache them.
+  //   final names = _factory.listTimezoneIds();
 
-    // We ignore SystemV timezones as they are not
-    // supported by the tubular_time_tzdb project
-    names.removeWhere((element) => element.startsWith('SystemV/'));
+  //   // We ignore SystemV timezones as they are not
+  //   // supported by the tubular_time_tzdb project
+  //   names.removeWhere((element) => element.startsWith('SystemV/'));
 
-    _factory.cachedTimezoneNames = names;
-    return names;
-  }
+  //   _factory.cachedTimezoneNames = names;
+  //   return names;
+  // }
 
   TZ getTimezone(String id) {
     /// If the timezone is already cached, return it.
-    if (listTimezoneIds().contains(id)) {
-      return _factory.cachedTimezones[id]!;
-    }
-
-    /// If the timezone is not found, throw an exception.
-    if (!listTimezoneIds().contains(id)) {
-      throw TimezoneNotFoundException(id);
+    if ($factory.cachedTimezones.containsKey(id)) {
+      return $factory.cachedTimezones[id]!;
     }
 
     /// Otherwise, fetch the timezone and cache it.
-    final result = _factory.getTimezone(id);
-    _factory.cachedTimezones[id] = result;
+    final result = $factory.getTimezone(id);
+    $factory.cachedTimezones[id] = result;
     return result;
   }
 
   @override
   String toString() {
-    return 'TimezoneProvider($_factory)';
+    return 'TimezoneProvider(${this.$factory})';
   }
 }
 

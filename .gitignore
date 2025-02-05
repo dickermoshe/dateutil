@@ -147,3 +147,6 @@ dist
 .idea/*
 timezone.json
 universal_tz.g.dart
+
+# FVM Version Cache
+.fvm/

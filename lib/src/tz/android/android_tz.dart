@@ -21,6 +21,9 @@ class JavaTimezoneFactory extends TimezoneFactory<JavaTimezone> {
     jNames.release();
     return names.toSet();
   }
+
+  @override
+  String get name => 'java';
 }
 
 @Immutable()

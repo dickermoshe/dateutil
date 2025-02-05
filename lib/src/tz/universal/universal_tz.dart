@@ -39,6 +39,7 @@ final _ignoredKeys = [
   RegExp('^leapSeconds'),
   RegExp('^deltaTs'),
   RegExp('^_'),
+  RegExp('^SystemV/'),
 ];
 
 /// A timezone provider that works on all platforms.
@@ -47,7 +48,7 @@ final _ignoredKeys = [
 /// timezone information. This should only be used on windows
 /// which does not have a built-in IANA timezone database.
 class UniversalTimezoneFactory extends TimezoneFactory<UniversalTimezone> {
-  @override
+  /// List all the timezones in the universal database
   Set<String> listTimezoneIds() {
     return _tzDatabase.keys
         .where(
@@ -83,6 +84,9 @@ class UniversalTimezoneFactory extends TimezoneFactory<UniversalTimezone> {
     );
     return timezone;
   }
+
+  @override
+  String get name => 'universal';
 }
 
 @immutable
@@ -228,7 +232,9 @@ class UniversalTimezone extends BaseTimezone {
 
   /// Return the offset for a given time in milliseconds since epoch.
   /// The result is returned along with the index of the [_localTimeTypes]
-  (_LocalTimeType, int) _localTimeFor(int millisecondsSinceEpoch) {
+  (_LocalTimeType, int) _localTimeFor(
+    int millisecondsSinceEpoch,
+  ) {
     /// Some timezones don't have any history and are always the same.
     /// For instance, the timezone "Etc/UTC" is always the same.
     ///
@@ -264,8 +270,9 @@ class UniversalTimezone extends BaseTimezone {
 
   @override
   int offset(int millisecondsSinceEpoch) {
-    final (localTimeType, transitionIndex) =
-        _localTimeFor(millisecondsSinceEpoch);
+    final (localTimeType, transitionIndex) = _localTimeFor(
+      millisecondsSinceEpoch,
+    );
 
     /// If we are after the last transition, then we must use the [_dstRule]
     /// to infer the offset.
