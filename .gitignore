@@ -152,3 +152,4 @@ universal_tz.g.dart
 .fvm/
 build/
 .fvmrc
+timezone_names.g.dart

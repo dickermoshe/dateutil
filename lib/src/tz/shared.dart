@@ -2,11 +2,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
+@immutable
 abstract class TimezoneFactory<TZ extends BaseTimezone> {
   String get name;
-  Set<String>? cachedTimezoneNames;
   final Map<String, TZ> cachedTimezones = {};
-  // Set<String> listTimezoneIds();
+  Set<String> listTimezones();
   TZ getTimezone(String id);
 }
 
@@ -16,22 +16,6 @@ class TimezoneProvider<TZ extends BaseTimezone,
     TzFactory extends TimezoneFactory<TZ>> {
   final TzFactory $factory;
   const TimezoneProvider(this.$factory);
-  // Set<String> listTimezoneIds() {
-  //   /// If the timezone names are already cached, return them.
-  //   if (_factory.cachedTimezoneNames != null) {
-  //     return _factory.cachedTimezoneNames!;
-  //   }
-
-  //   /// Otherwise, fetch the timezone names and cache them.
-  //   final names = _factory.listTimezoneIds();
-
-  //   // We ignore SystemV timezones as they are not
-  //   // supported by the tubular_time_tzdb project
-  //   names.removeWhere((element) => element.startsWith('SystemV/'));
-
-  //   _factory.cachedTimezoneNames = names;
-  //   return names;
-  // }
 
   TZ getTimezone(String id) {
     /// If the timezone is already cached, return it.
@@ -44,6 +28,8 @@ class TimezoneProvider<TZ extends BaseTimezone,
     $factory.cachedTimezones[id] = result;
     return result;
   }
+
+  Set<String> listTimezones() => $factory.listTimezones();
 
   @override
   String toString() {

@@ -3,6 +3,7 @@ import 'package:jni/jni.dart';
 import 'package:meta/meta.dart';
 
 import '../shared.dart';
+import '../universal/timezone_names.g.dart';
 import 'bindings.dart';
 
 /// A factory that provides access to the Java timezone database.
@@ -12,14 +13,9 @@ class JavaTimezoneFactory extends TimezoneFactory<JavaTimezone> {
     return JavaTimezone(id);
   }
 
-  /// bla
-  Set<String> listTimezoneIds() {
-    final jNames = ZoneId.getAvailableZoneIds();
-    final names = jNames!.toList().map(
-          (e) => e!.toDartString(releaseOriginal: true),
-        );
-    jNames.release();
-    return names.toSet();
+  @override
+  Set<String> listTimezones() {
+    return timezoneNames;
   }
 
   @override

@@ -39,9 +39,13 @@ jobs:
           cmake-version: "3.16.x"
       - name: Set up Maven
         uses: stCarolas/setup-maven@v5
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
       - name: Install dependencies
         run: dart pub get
       - name: Build
-        run: dart run tool/prepare.dart
-      - name: Test
-        run: dart test
+        run: dart run tool/prepare.dart --skip-java-bindings
+      - name: Test Web
+        run: dart test test/web_test.dart --platform chrome
+      - name: Test Java
+        run: dart test test/java_test.dart

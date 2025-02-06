@@ -42,21 +42,18 @@ final _ignoredKeys = [
   RegExp('^SystemV/'),
 ];
 
+/// Check if a key in the timezone database is an ignored key.
+@visibleForTesting
+bool isIgnoredKey(String key) {
+  return _ignoredKeys.any((k) => k.hasMatch(key));
+}
+
 /// A timezone provider that works on all platforms.
 ///
 /// This provider uses a bundled timezone database to provide
 /// timezone information. This should only be used on windows
 /// which does not have a built-in IANA timezone database.
 class UniversalTimezoneFactory extends TimezoneFactory<UniversalTimezone> {
-  /// List all the timezones in the universal database
-  Set<String> listTimezoneIds() {
-    return _tzDatabase.keys
-        .where(
-          (e) => _ignoredKeys.every((k) => !k.hasMatch(e)),
-        )
-        .toSet();
-  }
-
   @override
   UniversalTimezone getTimezone(String id) {
     /// Fetch the raw timezone data from the database.
@@ -87,6 +84,21 @@ class UniversalTimezoneFactory extends TimezoneFactory<UniversalTimezone> {
 
   @override
   String get name => 'universal';
+
+  @override
+  Set<String> listTimezones() {
+    /// Don't use the `timezoneNames` variable if
+    /// we have the entire database.
+    ///
+    /// This is done so we arent including a timezone
+    /// list in the final application if we have
+    /// the entire database.
+    return _tzDatabase.keys
+        .where(
+          (e) => !isIgnoredKey(e),
+        )
+        .toSet();
+  }
 }
 
 @immutable

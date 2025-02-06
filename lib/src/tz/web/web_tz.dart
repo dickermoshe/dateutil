@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 import '../shared.dart';
+import '../universal/timezone_names.g.dart';
 
 @JS('BigInt')
 external JSBigInt _bigInt(String s);
@@ -30,15 +31,10 @@ class WebTimezoneFactory extends TimezoneFactory<WebTimezone> {
     return tz;
   }
 
-  // @override
-  // Set<String> listTimezoneIds() {
-  //   final jNames = ZoneId.getAvailableZoneIds();
-  //   final names = jNames!.toList().map(
-  //         (e) => e!.toDartString(releaseOriginal: true),
-  //       );
-  //   jNames.release();
-  //   return names.toSet();
-  // }
+  @override
+  Set<String> listTimezones() {
+    return timezoneNames;
+  }
 }
 
 @Immutable()

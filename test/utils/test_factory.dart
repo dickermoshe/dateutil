@@ -15,7 +15,7 @@ void testFactory(TimezoneFactory factory) {
   );
   final testProvider = TimezoneProvider(factory);
 
-  for (final tzname in universalProvider.$factory.listTimezoneIds()) {
+  for (final tzname in universalProvider.listTimezones()) {
     test(tzname, () {
       final universalTz = universalProvider.getTimezone(tzname);
       final testTz = testProvider.getTimezone(tzname);

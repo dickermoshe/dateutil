@@ -1,10 +1,12 @@
 // ignore_for_file: avoid_print
 
+import 'dart:convert';
 import 'dart:io';
 import 'package:archive/archive_io.dart';
+import 'package:dateutil/src/tz/universal/universal_tz.dart';
 import 'package:path/path.dart' as p;
 
-void main() async {
+void main(List<String> args) async {
   final javaHome = Platform.environment['JAVA_HOME'];
   if (javaHome == null) {
     print('JAVA_HOME is not set');
@@ -28,16 +30,33 @@ void main() async {
     print('This script should be run from the root of the dateutil project');
     exit(1);
   }
-  final javaArchive = p.join(javaDir.path, 'lib', 'src.zip');
-  final outputFile = p.join(javaDir.path, 'lib', 'src');
-  if (!File(javaArchive).existsSync()) {
-    print('Java archive not found at $javaArchive');
-    exit(1);
+  final javaSrcOutputDir = p.join(javaDir.path, 'lib', 'src');
+  if (!args.contains('--skip-java-bindings')) {
+    final javaArchive = p.join(javaDir.path, 'lib', 'src.zip');
+    if (!File(javaArchive).existsSync()) {
+      print('Java archive not found at $javaArchive');
+      exit(1);
+    }
+    if (!Directory(javaSrcOutputDir).existsSync()) {
+      print('Extracting Java archive to $javaSrcOutputDir');
+      await extractFileToDisk(javaArchive, javaSrcOutputDir);
+    }
+    final generateBindings = Process.runSync('dart', [
+      'run',
+      'jnigen',
+      '--config',
+      'jnigen.yaml',
+      '-Dsource_path=${p.canonicalize(p.join(javaSrcOutputDir, 'java.base'))}',
+    ]);
+
+    if (generateBindings.exitCode != 0) {
+      print('Failed to generate JNI bindings');
+      print(generateBindings.stdout);
+      print(generateBindings.stderr);
+      exit(1);
+    }
   }
-  if (!Directory(outputFile).existsSync()) {
-    print('Extracting Java archive to $outputFile');
-    await extractFileToDisk(javaArchive, outputFile);
-  }
+
   final nodeCheckResult = Process.runSync('node', ['-v'], runInShell: true);
   if (nodeCheckResult.exitCode != 0) {
     print('Node.js is not installed');
@@ -82,6 +101,27 @@ void main() async {
     print(generateTubular.stderr);
     exit(1);
   }
+
+  final tzDb = jsonDecode(File(timezoneDatabaseLocation).readAsStringSync())
+      as Map<String, dynamic>;
+  final timeZoneNames =
+      // ignore: invalid_use_of_visible_for_testing_member
+      tzDb.keys.where((element) => !isIgnoredKey(element));
+  File(
+    p.join(
+      Directory.current.path,
+      'lib',
+      'src',
+      'tz',
+      'universal',
+      'timezone_names.g.dart',
+    ),
+  ).writeAsStringSync(
+    """
+///A list of all the valid timezones that dateutil can parse across all platforms
+const timezoneNames = ${timeZoneNames.map((e) => "'$e'").toSet()};""",
+  );
+
   final pubGetResult =
       Process.runSync('dart', ['pub', 'get'], runInShell: true);
   if (pubGetResult.exitCode != 0) {
@@ -112,21 +152,6 @@ void main() async {
     print('Failed to run `dart run jni:setup`');
     print(setupJni.stdout);
     print(setupJni.stderr);
-    exit(1);
-  }
-
-  final generateBindings = Process.runSync('dart', [
-    'run',
-    'jnigen',
-    '--config',
-    'jnigen.yaml',
-    '-Dsource_path=${p.canonicalize(p.join(outputFile, 'java.base'))}',
-  ]);
-
-  if (generateBindings.exitCode != 0) {
-    print('Failed to generate JNI bindings');
-    print(generateBindings.stdout);
-    print(generateBindings.stderr);
     exit(1);
   }
 
