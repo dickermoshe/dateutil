@@ -130,5 +130,17 @@ void main() async {
     exit(1);
   }
 
+  final updateTzdb = Process.runSync(
+    'java',
+    ['-jar', 'tool/tzupdater.jar', '-f'],
+    runInShell: true,
+  );
+  if (updateTzdb.exitCode != 0) {
+    print('Failed to update the timezone database');
+    print(updateTzdb.stdout);
+    print(updateTzdb.stderr);
+    exit(1);
+  }
+
   print('Success');
 }
