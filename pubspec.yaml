@@ -1,6 +1,7 @@
 name: dateutil
 description: Platform-integrated timezone library for Dart and Flutter.
-version: 1.0.0
+version: 0.1.0
+repository: https://github.com/dickermoshe/dateutil
 
 environment:
   sdk: ^3.6.1
