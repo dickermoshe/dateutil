@@ -16,44 +16,38 @@ extension type _ZonedDateTime._(JSObject _) implements JSObject {
 }
 
 /// A factory that provides access to the Java timezone database.
+@internal
 class WebTimezoneFactory extends TimezoneFactory<WebTimezone> {
   @override
   String get name => 'web';
   @override
-  WebTimezone getTimezone(String id) {
-    final tz = WebTimezone(id);
-    // Check that it actually exists
-    try {
-      tz.offset(0);
-    } catch (e) {
-      throw TimezoneNotFoundException(id);
-    }
-    return tz;
-  }
+  WebTimezone getTimezone(String id) =>WebTimezone(id);
+  
 
   @override
-  Set<String> listTimezones() {
-    return timezoneNames;
-  }
+  Set<String> listTimezones() =>timezoneNames;
 }
 
-@Immutable()
 
+@Immutable()
+@internal
 /// A timezone that uses the Java timezone database.
-class WebTimezone extends BaseTimezone with EquatableMixin {
+class WebTimezone with EquatableMixin implements Timezone {
   /// Creates a new Java timezone with the given [id].
-  const WebTimezone(super.id);
+  WebTimezone(this.id);
+  
+  @override
+  final String id;
 
   @override
   int offset(int millisecondsSinceEpoch) {
-    return (_ZonedDateTime(
-              _bigInt((millisecondsSinceEpoch * 1_000_000).toString()),
-              id,
-            ).offsetNanoseconds /
-            1_000_000)
-        .toInt();
+    final epochNanoseconds = _bigInt((millisecondsSinceEpoch * 1_000_000).toString());
+    final dt = _ZonedDateTime(epochNanoseconds,id);
+    return (dt.offsetNanoseconds / 1_000_000).toInt();
   }
 
   @override
   List<Object?> get props => [id];
+  @override
+  bool? get stringify => true;
 }

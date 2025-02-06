@@ -7,6 +7,7 @@ import '../universal/timezone_names.g.dart';
 import 'bindings.dart';
 
 /// A factory that provides access to the Java timezone database.
+@internal
 class JavaTimezoneFactory extends TimezoneFactory<JavaTimezone> {
   @override
   JavaTimezone getTimezone(String id) {
@@ -22,12 +23,15 @@ class JavaTimezoneFactory extends TimezoneFactory<JavaTimezone> {
   String get name => 'java';
 }
 
-@Immutable()
-
 /// A timezone that uses the Java timezone database.
-class JavaTimezone extends BaseTimezone with EquatableMixin {
+@Immutable()
+@internal
+class JavaTimezone with EquatableMixin implements Timezone {
   /// Creates a new Java timezone with the given [id].
-  const JavaTimezone(super.id);
+  const JavaTimezone(this.id);
+
+  @override
+  final String id;
 
   @override
   int offset(int millisecondsSinceEpoch) {
@@ -42,4 +46,6 @@ class JavaTimezone extends BaseTimezone with EquatableMixin {
 
   @override
   List<Object?> get props => [id];
+  @override
+  bool? get stringify => true;
 }

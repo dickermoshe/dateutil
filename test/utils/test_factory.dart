@@ -38,18 +38,17 @@ List<int> _defaultYears(UniversalTimezone tz) {
   return years;
 }
 
-void testFactory(TimezoneFactory factory, {List<int>? years}) {
-  group(factory.name, () {
-    final universalProvider =
-        TimezoneProvider<UniversalTimezone, UniversalTimezoneFactory>(
-      UniversalTimezoneFactory(),
-    );
-    final testProvider = TimezoneProvider(factory);
+void testFactory(TimezoneFactory testFactory, {List<int>? years}) {
+  group(testFactory.name, () {
+    final universalFactory = UniversalTimezoneFactory();
 
-    final testDate = universalProvider.listTimezones().map((e) {
-      final uniTz = universalProvider.getTimezone(e);
-      final testTz = testProvider.getTimezone(e);
-      final effectiveYears = (years ?? _defaultYears(uniTz)).shuffled();
+    final testDate = universalFactory.listTimezones().map((e) {
+      Timezone.factory = universalFactory;
+      final uniTz = Timezone(e);
+      Timezone.factory = testFactory;
+      final testTz = testFactory.getTimezone(e);
+      final effectiveYears =
+          (years ?? _defaultYears(uniTz as UniversalTimezone)).shuffled();
       return (
         testTz: testTz,
         universalTz: uniTz,
@@ -61,7 +60,7 @@ void testFactory(TimezoneFactory factory, {List<int>? years}) {
       test(t.testTz.id, () {
         for (final year in t.years) {
           expect(t.universalTz.id, t.testTz.id);
-          var dt = DateTime.utc(year);
+          var dt = DateTime.utc(year, 5);
           while (dt.year < year + 1) {
             final universalOffset =
                 t.universalTz.offset(dt.millisecondsSinceEpoch);

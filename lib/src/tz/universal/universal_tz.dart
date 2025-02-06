@@ -1,4 +1,4 @@
-/// This library contains a [TimezoneProvider] which works
+/// This library contains a [Timezone] which works
 /// on all platforms. It uses a bundled timezone database
 /// to provide timezone information.
 ///
@@ -53,6 +53,7 @@ bool isIgnoredKey(String key) {
 /// This provider uses a bundled timezone database to provide
 /// timezone information. This should only be used on windows
 /// which does not have a built-in IANA timezone database.
+@internal
 class UniversalTimezoneFactory extends TimezoneFactory<UniversalTimezone> {
   @override
   UniversalTimezone getTimezone(String id) {
@@ -87,12 +88,6 @@ class UniversalTimezoneFactory extends TimezoneFactory<UniversalTimezone> {
 
   @override
   Set<String> listTimezones() {
-    /// Don't use the `timezoneNames` variable if
-    /// we have the entire database.
-    ///
-    /// This is done so we arent including a timezone
-    /// list in the final application if we have
-    /// the entire database.
     return _tzDatabase.keys
         .where(
           (e) => !isIgnoredKey(e),
@@ -104,7 +99,8 @@ class UniversalTimezoneFactory extends TimezoneFactory<UniversalTimezone> {
 @immutable
 
 /// A class representing a universal timezone.
-class UniversalTimezone extends BaseTimezone {
+@internal
+class UniversalTimezone extends Equatable implements Timezone {
   /// Construct a timezone from the raw timezone data.
   factory UniversalTimezone({
     required String id,
@@ -144,13 +140,16 @@ class UniversalTimezone extends BaseTimezone {
   }
 
   const UniversalTimezone._(
-    super.id,
+    this.id,
     this._basic,
     this._localTimeTypes,
     this._lttIndex60,
     this._transitionDeltas,
     this._dstRule,
   );
+
+  @override
+  final String id;
 
   /// Some basic information about the timezone.
   final _Basic _basic;
@@ -331,6 +330,8 @@ class UniversalTimezone extends BaseTimezone {
 
   @override
   List<Object?> get props => [id];
+  @override
+  bool? get stringify => true;
 }
 
 /// Temporary class to hold a DST rule.

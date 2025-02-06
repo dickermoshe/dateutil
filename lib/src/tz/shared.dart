@@ -1,63 +1,74 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
+import 'factory_stub.dart'
+    if (dart.library.html) 'factory_web.dart'
+    if (dart.library.io) 'factory_io.dart';
 
 @immutable
-abstract class TimezoneFactory<TZ extends BaseTimezone> {
+@internal
+abstract class TimezoneFactory<TZ extends Timezone> {
+  /// The name of this factory.
   String get name;
-  final Map<String, TZ> cachedTimezones = {};
+
+  /// Returns a list of all available timezone identifiers.
   Set<String> listTimezones();
+
+  /// Gets the timezone with the given [id].
   TZ getTimezone(String id);
 }
 
-/// Base class for all timezones providers.
 @immutable
-class TimezoneProvider<TZ extends BaseTimezone,
-    TzFactory extends TimezoneFactory<TZ>> {
-  final TzFactory $factory;
-  const TimezoneProvider(this.$factory);
 
-  TZ getTimezone(String id) {
-    /// If the timezone is already cached, return it.
-    if ($factory.cachedTimezones.containsKey(id)) {
-      return $factory.cachedTimezones[id]!;
+/// Represents a timezone with a unique identifier and provides methods to
+/// retrieve timezone information such as the offset from UTC at a given time.
+abstract class Timezone {
+  /// Creates a new timezone with the given [id].
+  /// Calling this contructor with an invalid id will throw a [TimezoneNotFoundException].
+  factory Timezone(String id) {
+    if (_cachedTimezones.containsKey(id)) {
+      return _cachedTimezones[id]!;
     }
 
-    /// Otherwise, fetch the timezone and cache it.
-    final result = $factory.getTimezone(id);
-    $factory.cachedTimezones[id] = result;
+    if (!_factory.listTimezones().contains(id)) {
+      throw TimezoneNotFoundException(id);
+    }
+
+    final result = _factory.getTimezone(id);
+    _cachedTimezones[id] = result;
     return result;
   }
 
-  Set<String> listTimezones() => $factory.listTimezones();
+  static TimezoneFactory _factory = defaultFactory;
+  static final Map<String, Timezone> _cachedTimezones = {};
 
-  @override
-  String toString() {
-    return 'TimezoneProvider(${this.$factory})';
+  @visibleForTesting
+  // ignore: public_member_api_docs
+  static TimezoneFactory get factory => _factory;
+
+  @visibleForTesting
+  // ignore: public_member_api_docs
+  static set factory(TimezoneFactory factory) {
+    _factory = factory;
+    _cachedTimezones.clear();
   }
-}
 
-@immutable
-abstract class BaseTimezone with EquatableMixin {
-  const BaseTimezone(this.id);
+  /// Returns a list of all available timezone identifiers.
+  static Set<String> listTimezones() => _factory.listTimezones();
 
   /// A unique identifier for this timezone.
-  final String id;
+  String get id;
 
   /// Returns the offset in milliseconds for the timezone at the given
   /// [millisecondsSinceEpoch].
   int offset(int millisecondsSinceEpoch);
-
-  @override
-  bool? get stringify => true;
-  @override
-  List<Object?> get props => [id];
 }
 
+/// Thrown when a timezone with the given name is not found.
 class TimezoneNotFoundException implements Exception {
-  final String timezoneName;
-
+  /// Creates a new TimezoneNotFoundException with the given [timezoneName].
   TimezoneNotFoundException(this.timezoneName);
+
+  /// The name of the timezone that was not found.
+  final String timezoneName;
 
   @override
   String toString() =>

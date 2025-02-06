@@ -104,6 +104,10 @@ void main(List<String> args) async {
 
   final tzDb = jsonDecode(File(timezoneDatabaseLocation).readAsStringSync())
       as Map<String, dynamic>;
+  if (tzDb['version'] != '2025a') {
+    print('The timezone database is not up to date');
+    exit(1);
+  }
   final timeZoneNames =
       // ignore: invalid_use_of_visible_for_testing_member
       tzDb.keys.where((element) => !isIgnoredKey(element));
@@ -118,7 +122,9 @@ void main(List<String> args) async {
     ),
   ).writeAsStringSync(
     """
+import 'package:meta/meta.dart';
 ///A list of all the valid timezones that dateutil can parse across all platforms
+@internal
 const timezoneNames = ${timeZoneNames.map((e) => "'$e'").toSet()};""",
   );
 
