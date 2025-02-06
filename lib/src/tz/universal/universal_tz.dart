@@ -43,8 +43,7 @@ final _ignoredKeys = [
 ];
 
 /// Check if a key in the timezone database is an ignored key.
-@visibleForTesting
-bool isIgnoredKey(String key) {
+bool _isIgnoredKey(String key) {
   return _ignoredKeys.any((k) => k.hasMatch(key));
 }
 
@@ -90,7 +89,7 @@ class UniversalTimezoneFactory extends TimezoneFactory<UniversalTimezone> {
   Set<String> listTimezones() {
     return _tzDatabase.keys
         .where(
-          (e) => !isIgnoredKey(e),
+          (e) => !_isIgnoredKey(e),
         )
         .toSet();
   }
