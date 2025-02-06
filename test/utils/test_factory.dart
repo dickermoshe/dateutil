@@ -60,7 +60,7 @@ void testFactory(TimezoneFactory testFactory, {List<int>? years}) {
       test(t.testTz.id, () {
         for (final year in t.years) {
           expect(t.universalTz.id, t.testTz.id);
-          var dt = DateTime.utc(year, 5);
+          var dt = DateTime.utc(year);
           while (dt.year < year + 1) {
             final universalOffset =
                 t.universalTz.offset(dt.millisecondsSinceEpoch);
