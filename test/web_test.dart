@@ -1,13 +1,8 @@
 import 'package:dateutil/src/tz/web/web_tz.dart';
-import 'package:test/test.dart';
+
+import 'utils/test_factory.dart';
 
 void main() {
-  group('js', () {
-    final factory = WebTimezoneFactory();
-    for (final tz in factory.listTimezones()) {
-      test(tz, () {
-        factory.getTimezone(tz);
-      });
-    }
-  });
+  final factory = WebTimezoneFactory();
+  testFactory(factory, years: [DateTime.now().year]);
 }

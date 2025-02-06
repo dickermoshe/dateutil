@@ -47,10 +47,10 @@ class WebTimezone extends BaseTimezone with EquatableMixin {
   @override
   int offset(int millisecondsSinceEpoch) {
     return (_ZonedDateTime(
-              _bigInt(millisecondsSinceEpoch.toString()),
+              _bigInt((millisecondsSinceEpoch * 1_000_000).toString()),
               id,
             ).offsetNanoseconds /
-            1000000)
+            1_000_000)
         .toInt();
   }
 
