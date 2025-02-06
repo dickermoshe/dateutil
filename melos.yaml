@@ -1,8 +1,0 @@
-name: dateutils
-
-packages:
-  - .
-
-scripts:
-  prepare: |
-    npm install -g @tubular/time-tzdb@1 && npx tzc --large lib/src/tz/universal/timezone.json -o && melos bootstrap  && dart run build_runner build --delete-conflicting-outputs

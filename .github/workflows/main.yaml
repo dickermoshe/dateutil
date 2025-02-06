@@ -8,10 +8,12 @@ on:
   schedule:
     - cron: "0 5 * * *"
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
-    concurrency:
-      group: ${{ github.workflow }}
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
