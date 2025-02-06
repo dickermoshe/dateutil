@@ -150,3 +150,5 @@ universal_tz.g.dart
 
 # FVM Version Cache
 .fvm/
+build/
+.fvmrc
