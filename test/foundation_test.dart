@@ -8,5 +8,5 @@ import 'utils/test_factory.dart';
 
 void main() {
   final factory = FoundationTimezoneFactory();
-  testFactory(factory, years: [DateTime.now().year]);
+  testFactory(factory);
 }
