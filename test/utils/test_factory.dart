@@ -65,7 +65,6 @@ void testFactory(TimezoneFactory testFactory, {List<int>? years}) {
             final universalOffset =
                 t.universalTz.offset(dt.millisecondsSinceEpoch);
             final testOffset = t.testTz.offset(dt.millisecondsSinceEpoch);
-
             expect(
               universalOffset,
               testOffset,

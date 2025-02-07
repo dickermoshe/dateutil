@@ -153,3 +153,7 @@ universal_tz.g.dart
 build/
 .fvmrc
 timezone_names.g.dart
+.sdkmanrc
+.tool-versions
+.flutter-plugins
+.flutter-plugins-dependencies
