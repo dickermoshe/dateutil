@@ -46,8 +46,11 @@ class FoundationTimezone with EquatableMixin implements Timezone {
     // as the reference date.
     // They also use seconds instead of milliseconds
     final secondsSinceEpoch = (millisecondsSinceEpoch / 1000) - 978307200;
-    final tz = TimeZone(DynamicLibrary.open(
-        '/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation'));
+    final tz = TimeZone(
+      DynamicLibrary.open(
+        '/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation',
+      ),
+    );
 
     return using((a) {
       final cStr = id.toNativeUtf8();
@@ -57,6 +60,10 @@ class FoundationTimezone with EquatableMixin implements Timezone {
         cStr.cast<Char>(),
         encoding,
       );
+      // If it's null, throw
+      if (tryAbbrev == nullptr) {
+        throw ArgumentError('Invalid timezone id: $id');
+      }
       tz.CFRetain(tryAbbrev.cast());
 
       try {
@@ -65,6 +72,9 @@ class FoundationTimezone with EquatableMixin implements Timezone {
           tryAbbrev,
           0,
         );
+        if (knownTimeZones == nullptr) {
+          throw ArgumentError('Invalid timezone id: $id');
+        }
         tz.CFRetain(knownTimeZones.cast());
         try {
           final data = tz.CFTimeZoneGetSecondsFromGMT(
