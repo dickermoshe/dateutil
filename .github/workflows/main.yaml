@@ -53,3 +53,15 @@ jobs:
         run: dart run tool/prepare.dart
       - name: Test Java
         run: dart test test/java_test.dart
+
+  test-mac:
+    runs-on: macos-13
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+      - name: Set Up Environment
+        uses: ./.github/actions/setup
+      - name: Prepare Project
+        run: dart run tool/prepare.dart --skip-java
+      - name: Test Mac
+        run: dart test test/foundation_test.dart
