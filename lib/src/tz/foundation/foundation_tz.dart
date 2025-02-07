@@ -47,6 +47,7 @@ class FoundationTimezone with EquatableMixin implements Timezone {
     // They also use seconds instead of milliseconds
     final secondsSinceEpoch = (millisecondsSinceEpoch / 1000) - 978307200;
     final tz = TimeZone(DynamicLibrary.executable());
+
     return using((a) {
       final cStr = id.toNativeUtf8(allocator: a);
       final encoding = tz.CFStringGetSystemEncoding();
@@ -55,12 +56,15 @@ class FoundationTimezone with EquatableMixin implements Timezone {
         cStr.cast<Char>(),
         encoding,
       );
+      tz.CFRetain(tryAbbrev.cast());
+
       try {
         final knownTimeZones = tz.CFTimeZoneCreateWithName(
           tz.kCFAllocatorDefault,
           tryAbbrev,
           0,
         );
+        tz.CFRetain(knownTimeZones.cast());
         try {
           final data = tz.CFTimeZoneGetSecondsFromGMT(
             knownTimeZones,

@@ -68,6 +68,19 @@ class TimeZone {
 
   CFAllocatorRef get kCFAllocatorUseContext => _kCFAllocatorUseContext.value;
 
+  CFTypeRef CFRetain(
+    CFTypeRef cf,
+  ) {
+    return _CFRetain(
+      cf,
+    );
+  }
+
+  late final _CFRetainPtr =
+      _lookup<ffi.NativeFunction<CFTypeRef Function(CFTypeRef)>>('CFRetain');
+  late final _CFRetain =
+      _CFRetainPtr.asFunction<CFTypeRef Function(CFTypeRef)>();
+
   void CFRelease(
     CFTypeRef cf,
   ) {
