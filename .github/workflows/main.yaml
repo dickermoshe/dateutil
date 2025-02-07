@@ -13,8 +13,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    runs-on: macos-13
+  setup:
+    runs-on: ubuntu-latest
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -24,6 +24,28 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+      - name: Install dependencies
+        run: dart pub get
+      - name: Build
+        run: dart run tool/prepare.dart --skip-java-bindings
+
+  test-web:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+      - name: Test Web
+        run: dart test test/web_test.dart --platform chrome
+
+  test-java:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
       - name: Install Java
         uses: actions/setup-java@v4
         with:
@@ -39,15 +61,5 @@ jobs:
           cmake-version: "3.16.x"
       - name: Set up Maven
         uses: stCarolas/setup-maven@v5
-      - name: Setup Chrome
-        uses: browser-actions/setup-chrome@v1
-      - name: Install dependencies
-        run: dart pub get
-      - name: Build
-        run: dart run tool/prepare.dart --skip-java-bindings
-      # - name: Test Web
-      #   run: dart test test/web_test.dart --platform chrome
-      # - name: Test Java
-      #   run: dart test test/java_test.dart
-      - name: Test MacOS
-        run: dart test test/foundation_test.dart
+      - name: Test Java
+        run: dart test test/java_test.dart

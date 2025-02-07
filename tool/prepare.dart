@@ -46,6 +46,33 @@ void main(List<String> args) async {
     print('This script should be run from the root of the dateutil project');
     exit(1);
   }
+
+  if (!args.contains('--skip-java-bindings')) {
+    final setupJni = Process.runSync(
+      'dart',
+      ['run', 'jni:setup'],
+      runInShell: true,
+    );
+    if (setupJni.exitCode != 0) {
+      print('Failed to run `dart run jni:setup`');
+      print(setupJni.stdout);
+      print(setupJni.stderr);
+      exit(1);
+    }
+
+    final updateTzdb = Process.runSync(
+      'java',
+      ['-jar', 'tool/tzupdater.jar', '-f'],
+      runInShell: true,
+    );
+    if (updateTzdb.exitCode != 0) {
+      print('Failed to update the timezone database');
+      print(updateTzdb.stdout);
+      print(updateTzdb.stderr);
+      exit(1);
+    }
+  }
+
   // final javaSrcOutputDir = p.join(javaDir.path, 'lib', 'src');
   // if (!args.contains('--skip-java-bindings')) {
   //   final javaArchive = p.join(javaDir.path, 'lib', 'src.zip');
@@ -162,29 +189,6 @@ const timezoneNames = ${timeZoneNames.map((e) => "'$e'").toSet()};""",
     );
     print(buildResult.stdout);
     print(buildResult.stderr);
-    exit(1);
-  }
-  final setupJni = Process.runSync(
-    'dart',
-    ['run', 'jni:setup'],
-    runInShell: true,
-  );
-  if (setupJni.exitCode != 0) {
-    print('Failed to run `dart run jni:setup`');
-    print(setupJni.stdout);
-    print(setupJni.stderr);
-    exit(1);
-  }
-
-  final updateTzdb = Process.runSync(
-    'java',
-    ['-jar', 'tool/tzupdater.jar', '-f'],
-    runInShell: true,
-  );
-  if (updateTzdb.exitCode != 0) {
-    print('Failed to update the timezone database');
-    print(updateTzdb.stdout);
-    print(updateTzdb.stderr);
     exit(1);
   }
 
