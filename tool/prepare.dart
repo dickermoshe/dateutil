@@ -47,7 +47,7 @@ void main(List<String> args) async {
     exit(1);
   }
 
-  if (!args.contains('--skip-java-bindings')) {
+  if (!args.contains('--skip-java')) {
     final setupJni = Process.runSync(
       'dart',
       ['run', 'jni:setup'],
