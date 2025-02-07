@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-13
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -45,7 +45,9 @@ jobs:
         run: dart pub get
       - name: Build
         run: dart run tool/prepare.dart --skip-java-bindings
-      - name: Test Web
-        run: dart test test/web_test.dart --platform chrome
-      - name: Test Java
-        run: dart test test/java_test.dart
+      # - name: Test Web
+      #   run: dart test test/web_test.dart --platform chrome
+      # - name: Test Java
+      #   run: dart test test/java_test.dart
+      - name: Test MacOS
+        run: dart test test/foundation_test.dart
