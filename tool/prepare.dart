@@ -144,7 +144,6 @@ void main(List<String> args) async {
       '--large',
       timezoneDatabaseLocation,
       '-o',
-      '-5',
       if (tzVersion != null) ...[
         '-u',
         tzVersion,
