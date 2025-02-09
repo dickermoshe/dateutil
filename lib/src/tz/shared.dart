@@ -14,10 +14,9 @@ abstract class TimezoneFactory<TZ extends Timezone> {
   TZ getTimezone(String id);
 }
 
-@immutable
-
 /// Represents a timezone with a unique identifier and provides methods to
 /// retrieve timezone information such as the offset from UTC at a given time.
+@immutable
 abstract class Timezone {
   /// Creates a new timezone with the given [id].
   /// Calling this contructor with an invalid id will throw a [TimezoneNotFoundException].
@@ -37,14 +36,12 @@ abstract class Timezone {
 
   static TimezoneFactory _factory = UniversalTimezoneFactory();
   static final Map<String, Timezone> _cachedTimezones = {};
-
   @visibleForTesting
-  // ignore: public_member_api_docs
-  static TimezoneFactory get factory => _factory;
 
-  @visibleForTesting
-  // ignore: public_member_api_docs
-  static set factory(TimezoneFactory factory) {
+  /// Updates the timezone factory to use.
+  ///
+  /// This is only intended for testing purposes.
+  static void setFactory(TimezoneFactory factory) {
     _factory = factory;
     _cachedTimezones.clear();
   }

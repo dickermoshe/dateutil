@@ -37,5 +37,7 @@ jobs:
         uses: stCarolas/setup-maven@v5
       - name: Prepare Project
         run: dart run tool/prepare.dart
+      - name: Print TZ Version
+        run: java -jar ./tool/tzupdater.jar -V
       - name: Test Java
         run: dart test test/universal_test.dart --fail-fast

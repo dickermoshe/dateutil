@@ -55,9 +55,9 @@ void testFactory(TimezoneFactory testFactory, {List<int>? years}) {
 
   for (final t in tests) {
     test('${t.tz} - ${t.year}', () {
-      Timezone.factory = universalFactory;
+      Timezone.setFactory(universalFactory);
       final uniTz = Timezone(t.tz);
-      Timezone.factory = testFactory;
+      Timezone.setFactory(testFactory);
       final testTz = testFactory.getTimezone(t.tz);
       expect(uniTz.id, testTz.id);
       var dt = DateTime.utc(t.year);
