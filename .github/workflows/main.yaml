@@ -13,21 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test-web:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Clone repository
-        uses: actions/checkout@v4
-      - name: Set Up Environment
-        uses: ./.github/actions/setup
-      - name: Prepare Project
-        run: dart run tool/prepare.dart --skip-java --tz=2024a
-      - name: Setup Chrome
-        uses: browser-actions/setup-chrome@v1
-      - name: Test Web
-        run: dart test test/web_test.dart --platform chrome --fail-fast
-
-  test-java:
+  test-universal:
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
@@ -52,18 +38,4 @@ jobs:
       - name: Prepare Project
         run: dart run tool/prepare.dart
       - name: Test Java
-        run: dart test test/java_test.dart --fail-fast
-
-  test-mac:
-    runs-on: macos-15
-    steps:
-      - name: Clone repository
-        uses: actions/checkout@v4
-      - name: Set Up Environment
-        uses: ./.github/actions/setup
-      - name: Prepare Project
-        run: dart run tool/prepare.dart --skip-java --tz=2024a
-      - name: Print Timezone version
-        run: cat /usr/share/zoneinfo/+VERSION
-      - name: Test Mac
-        run: dart test test/foundation_test.dart --fail-fast
+        run: dart test test/universal_test.dart --fail-fast
