@@ -32,24 +32,57 @@ class JavaTimezoneFactory extends TimezoneFactory<JavaTimezone> {
 @internal
 class JavaTimezone with EquatableMixin implements Timezone {
   /// Creates a new Java timezone with the given [id].
-  const JavaTimezone(this.id);
+  const JavaTimezone(this.name);
 
   @override
-  final String id;
+  final String name;
 
   @override
   int offset(int millisecondsSinceEpoch) {
     final instant = Instant.ofEpochMilli(millisecondsSinceEpoch);
-    final result = JString.fromString(id)
-        .use(ZoneId.of$1)!
+    final result = _zoneId()
         .use((p0) => ZonedDateTime.ofInstant(instant, p0))!
         .use((p0) => p0.getOffset()!.use((offset) => offset.getTotalSeconds()));
     instant!.release();
     return result * 1000;
   }
 
+  ZoneId _zoneId() {
+    return JString.fromString(name).use(ZoneId.of$1)!;
+  }
+
   @override
-  List<Object?> get props => [id];
+  List<Object?> get props => [name];
   @override
   bool? get stringify => true;
+
+  @override
+  int convert(
+    int year, [
+    int month = 1,
+    int day = 1,
+    int hour = 0,
+    int minute = 0,
+    int second = 0,
+    int millisecond = 0,
+    int microsecond = 0,
+  ]) {
+    final nanoSeconds = (microsecond * 1000) + (millisecond * 1000000);
+    return _zoneId().use(
+      (zone) => ZonedDateTime.of$2(
+        year,
+        month,
+        day,
+        hour,
+        minute,
+        second,
+        nanoSeconds,
+        zone,
+      )!
+          .use(
+        (zonedDateTime) => Instant.from(zonedDateTime)!
+            .use((instant) => instant.getEpochSecond() * 1000),
+      ),
+    );
+  }
 }

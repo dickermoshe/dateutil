@@ -36,11 +36,11 @@ abstract class Timezone {
 
   static TimezoneFactory _factory = UniversalTimezoneFactory();
   static final Map<String, Timezone> _cachedTimezones = {};
-  @visibleForTesting
 
   /// Updates the timezone factory to use.
   ///
   /// This is only intended for testing purposes.
+  @visibleForTesting
   static void setFactory(TimezoneFactory factory) {
     _factory = factory;
     _cachedTimezones.clear();
@@ -50,11 +50,23 @@ abstract class Timezone {
   static Set<String> listTimezones() => _factory.listTimezones();
 
   /// A unique identifier for this timezone.
-  String get id;
+  String get name;
 
   /// Returns the offset in milliseconds for the timezone at the given
   /// [millisecondsSinceEpoch].
   int offset(int millisecondsSinceEpoch);
+
+  /// Convert the given date and time for this timezone to milliseconds since epoch.
+  int convert(
+    int year, [
+    int month = 1,
+    int day = 1,
+    int hour = 0,
+    int minute = 0,
+    int second = 0,
+    int millisecond = 0,
+    int microsecond = 0,
+  ]);
 }
 
 /// Thrown when a timezone with the given name is not found.

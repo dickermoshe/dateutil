@@ -1,6 +1,6 @@
 name: tz
 description: Platform-integrated timezone library for Dart and Flutter.
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/dickermoshe/dateutil
 
 environment:

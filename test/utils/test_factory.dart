@@ -63,7 +63,7 @@ void testFactory(TimezoneFactory testFactory, {List<int>? years}) {
       final uniTz = Timezone(t.tz);
       Timezone.setFactory(testFactory);
       final testTz = testFactory.getTimezone(t.tz);
-      expect(uniTz.id, testTz.id);
+      expect(uniTz.name, testTz.name);
       var dt = DateTime.utc(t.year);
       while (dt.year < t.year + 1) {
         final universalOffset = uniTz.offset(dt.millisecondsSinceEpoch);
@@ -73,6 +73,35 @@ void testFactory(TimezoneFactory testFactory, {List<int>? years}) {
           testOffset,
           reason:
               'Date: $dt, UniversalOffset:$universalOffset, TestOffset:$testOffset',
+        );
+        // Apply the offset to the date
+        final localized = dt.add(Duration(milliseconds: universalOffset));
+        // Try to convert it back and test it matches
+        final testConverted = testTz.convert(
+          localized.year,
+          localized.month,
+          localized.day,
+          localized.hour,
+          localized.minute,
+          localized.second,
+          localized.millisecond,
+          localized.microsecond,
+        );
+        final universalConverted = uniTz.convert(
+          localized.year,
+          localized.month,
+          localized.day,
+          localized.hour,
+          localized.minute,
+          localized.second,
+          localized.millisecond,
+          localized.microsecond,
+        );
+        expect(
+          universalConverted,
+          testConverted,
+          reason:
+              'Date: $dt, UniversalConverted:$universalConverted, TestConverted:$testConverted',
         );
         dt = dt.add(const Duration(minutes: 30));
       }
