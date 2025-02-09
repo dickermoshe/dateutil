@@ -62,7 +62,7 @@ jobs:
       - name: Set Up Environment
         uses: ./.github/actions/setup
       - name: Prepare Project
-        run: dart run tool/prepare.dart --skip-java --tz=2023c
+        run: dart run tool/prepare.dart --skip-java --tz=2024a
       - name: Print Timezone version
         run: cat /usr/share/zoneinfo/+VERSION
       - name: Test Mac
