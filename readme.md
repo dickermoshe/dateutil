@@ -1,6 +1,6 @@
-# dateutil
+# tz
 
-`dateutil` is a powerful Dart package designed to simplify the calculate time differences, and manage daylight saving time changes.
+`tz` is a powerful Dart package designed to simplify the calculate time differences, and manage daylight saving time changes.
 
 ## Features
 
@@ -10,13 +10,13 @@
 ## Installation
 
 ```bash
-dart pub add dateutil
+dart pub add tz
 ```
 
 ## Usage
 
 ```dart
-import 'package:dateutil/dateutil.dart';
+import 'package:tz/tz.dart';
 
 void main() {
   final timezone = Timezone('America/New_York');

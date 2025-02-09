@@ -1,9 +1,9 @@
 import 'dart:math';
 
 import 'package:collection/collection.dart';
-import 'package:dateutil/src/tz/shared.dart';
-import 'package:dateutil/src/tz/universal/universal_tz.dart';
 import 'package:test/test.dart';
+import 'package:tz/src/tz/shared.dart';
+import 'package:tz/src/tz/universal/universal_tz.dart';
 
 import 'unique_years.dart';
 

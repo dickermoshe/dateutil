@@ -1,7 +1,7 @@
-import 'package:dateutil/src/tz/shared.dart';
 import 'package:equatable/equatable.dart';
 import 'package:jni/jni.dart';
 import 'package:meta/meta.dart';
+import 'package:tz/src/tz/shared.dart';
 
 import 'bindings.dart';
 
