@@ -53,29 +53,25 @@ class FoundationTimezone with EquatableMixin implements Timezone {
     );
 
     return using((a) {
-      final cStr = id.toNativeUtf8();
-      final encoding = tz.CFStringGetSystemEncoding();
-      final tryAbbrev = tz.CFStringCreateWithCString(
+      final cStr = id.toNativeUtf8(allocator: a);
+      final timezoneName = tz.CFStringCreateWithCString(
         tz.kCFAllocatorDefault,
         cStr.cast<Char>(),
-        encoding,
+        kCFStringEncodingUTF8,
       );
-      // If it's null, throw
-      if (tryAbbrev == nullptr) {
+      if (timezoneName == nullptr) {
         throw ArgumentError('Invalid timezone id: $id');
       }
-      tz.CFRetain(tryAbbrev.cast());
 
       try {
         final knownTimeZones = tz.CFTimeZoneCreateWithName(
           tz.kCFAllocatorDefault,
-          tryAbbrev,
+          timezoneName,
           0,
         );
         if (knownTimeZones == nullptr) {
           throw ArgumentError('Invalid timezone id: $id');
         }
-        tz.CFRetain(knownTimeZones.cast());
         try {
           final data = tz.CFTimeZoneGetSecondsFromGMT(
             knownTimeZones,
@@ -87,7 +83,7 @@ class FoundationTimezone with EquatableMixin implements Timezone {
           tz.CFRelease(knownTimeZones.cast());
         }
       } finally {
-        tz.CFRelease(tryAbbrev.cast());
+        tz.CFRelease(timezoneName.cast());
       }
     });
   }

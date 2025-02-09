@@ -38,43 +38,40 @@ List<int> _defaultYears(UniversalTimezone tz) {
   return years;
 }
 
+typedef TestJob = ({String tz, int year});
+
 void testFactory(TimezoneFactory testFactory, {List<int>? years}) {
-  group(testFactory.name, () {
-    final universalFactory = UniversalTimezoneFactory();
+  final tests = <TestJob>[];
+  final universalFactory = UniversalTimezoneFactory();
 
-    final testDate = universalFactory.listTimezones().map((e) {
-      Timezone.factory = universalFactory;
-      final uniTz = Timezone(e);
-      Timezone.factory = testFactory;
-      final testTz = testFactory.getTimezone(e);
-      final effectiveYears =
-          (years ?? _defaultYears(uniTz as UniversalTimezone)).shuffled();
-      return (
-        testTz: testTz,
-        universalTz: uniTz,
-        years: effectiveYears,
-      );
-    }).shuffled();
-
-    for (final t in testDate) {
-      test(t.testTz.id, () {
-        for (final year in t.years) {
-          expect(t.universalTz.id, t.testTz.id);
-          var dt = DateTime.utc(year);
-          while (dt.year < year + 1) {
-            final universalOffset =
-                t.universalTz.offset(dt.millisecondsSinceEpoch);
-            final testOffset = t.testTz.offset(dt.millisecondsSinceEpoch);
-            expect(
-              universalOffset,
-              testOffset,
-              reason:
-                  'Date: $dt, UniversalOffset:$universalOffset, TestOffset:$testOffset',
-            );
-            dt = dt.add(const Duration(minutes: 30));
-          }
-        }
-      });
+  for (final tz in universalFactory.listTimezones()) {
+    final universalTz = universalFactory.getTimezone(tz);
+    final effectiveYears = (years ?? _defaultYears(universalTz)).shuffled();
+    for (final year in effectiveYears) {
+      tests.add((tz: tz, year: year));
     }
-  });
+  }
+  tests.shuffle();
+
+  for (final t in tests) {
+    test('${t.tz} - ${t.year}', () {
+      Timezone.factory = universalFactory;
+      final uniTz = Timezone(t.tz);
+      Timezone.factory = testFactory;
+      final testTz = testFactory.getTimezone(t.tz);
+      expect(uniTz.id, testTz.id);
+      var dt = DateTime.utc(t.year);
+      while (dt.year < t.year + 1) {
+        final universalOffset = uniTz.offset(dt.millisecondsSinceEpoch);
+        final testOffset = testTz.offset(dt.millisecondsSinceEpoch);
+        expect(
+          universalOffset,
+          testOffset,
+          reason:
+              'Date: $dt, UniversalOffset:$universalOffset, TestOffset:$testOffset',
+        );
+        dt = dt.add(const Duration(minutes: 30));
+      }
+    });
+  }
 }

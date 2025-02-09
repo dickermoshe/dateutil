@@ -1,5 +1,5 @@
+// ignore: library_annotations
 @TestOn('mac-os||ios')
-library;
 
 import 'package:dateutil/src/tz/foundation/foundation_tz.dart';
 import 'package:test/test.dart';
