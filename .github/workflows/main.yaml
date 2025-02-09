@@ -55,7 +55,7 @@ jobs:
         run: dart test test/java_test.dart --fail-fast
 
   test-mac:
-    runs-on: macos-13
+    runs-on: macos-latest
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
