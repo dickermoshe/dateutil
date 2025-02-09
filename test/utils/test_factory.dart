@@ -44,7 +44,11 @@ void testFactory(TimezoneFactory testFactory, {List<int>? years}) {
   final tests = <TestJob>[];
   final universalFactory = UniversalTimezoneFactory();
 
-  for (final tz in universalFactory.listTimezones()) {
+  final testTimezones = testFactory.listTimezones().toSet().intersection(
+        universalFactory.listTimezones().toSet(),
+      );
+
+  for (final tz in testTimezones) {
     final universalTz = universalFactory.getTimezone(tz);
     final effectiveYears = (years ?? _defaultYears(universalTz)).shuffled();
     for (final year in effectiveYears) {

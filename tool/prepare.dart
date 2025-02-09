@@ -164,25 +164,6 @@ void main(List<String> args) async {
     print('The timezone database is not up to date');
     exit(1);
   }
-  final timeZoneNames =
-      // ignore: invalid_use_of_visible_for_testing_member
-      tzDb.keys.where((element) => !isIgnoredKey(element));
-  File(
-    p.join(
-      Directory.current.path,
-      'lib',
-      'src',
-      'tz',
-      'universal',
-      'timezone_names.g.dart',
-    ),
-  ).writeAsStringSync(
-    """
-import 'package:meta/meta.dart';
-///A list of all the valid timezones that dateutil can parse across all platforms
-@internal
-const timezoneNames = ${timeZoneNames.map((e) => "'$e'").toSet()};""",
-  );
 
   final pubGetResult =
       Process.runSync('dart', ['pub', 'get'], runInShell: true);

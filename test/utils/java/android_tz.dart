@@ -1,9 +1,7 @@
-import 'package:dateutil/src/tz/universal/timezone_names.g.dart';
+import 'package:dateutil/src/tz/shared.dart';
 import 'package:equatable/equatable.dart';
 import 'package:jni/jni.dart';
 import 'package:meta/meta.dart';
-
-import 'package:dateutil/src/tz/shared.dart';
 
 import 'bindings.dart';
 
@@ -17,7 +15,12 @@ class JavaTimezoneFactory extends TimezoneFactory<JavaTimezone> {
 
   @override
   Set<String> listTimezones() {
-    return timezoneNames;
+    return ZoneId.getAvailableZoneIds()!.use((ids) {
+      return ids
+          .map((element) => element?.toDartString(releaseOriginal: true))
+          .nonNulls
+          .toSet();
+    });
   }
 
   @override
