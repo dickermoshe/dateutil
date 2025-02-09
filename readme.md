@@ -1,11 +1,35 @@
-# Dateutil
+# dateutil
 
-TODO: Write this...
+`dateutil` is a powerful Dart package designed to simplify the calculate time differences, and manage daylight saving time changes.
 
-# Contributing to `dateutils`
+## Features
 
-1. Install dependencies for ffigen 
-2. Install java 11, set JAVA_HOME (and make sure that $JAVA_HOME\bin\server\jvm.dll is on path for windows)
-3. Run `dart pub get` in the root directory
-4. Install nodejs and npm
-5. Run dart run ./tool/prepare.dart
+- **Timezone Support**: Easily convert between different timezones.
+- **Offset Handling**: Manage and apply time offsets to datetime objects.
+
+## Installation
+
+```bash
+dart pub add dateutil
+```
+
+## Usage
+
+```dart
+import 'package:dateutil/dateutil.dart';
+
+void main() {
+  final timezone = Timezone('America/New_York');
+  final now = DateTime.timestamp();
+  final offset = timezone.offset(now);
+  final time = now.add(Duration(milliseconds: offset));
+  print("It's $time in New York.");
+}
+```
+
+## Contributing
+
+1. Install Node 20 (for compiling timezone data)
+2. Install Java 11 (for tests)
+3. Run `dart pub get` to install dependencies
+4. Run `dart run ./tool/prepare.dart` to generate the timezone data

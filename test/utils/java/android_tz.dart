@@ -1,9 +1,10 @@
+import 'package:dateutil/src/tz/universal/timezone_names.g.dart';
 import 'package:equatable/equatable.dart';
 import 'package:jni/jni.dart';
 import 'package:meta/meta.dart';
 
-import '../shared.dart';
-import '../universal/timezone_names.g.dart';
+import 'package:dateutil/src/tz/shared.dart';
+
 import 'bindings.dart';
 
 /// A factory that provides access to the Java timezone database.

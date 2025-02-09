@@ -1,10 +1,9 @@
 import 'dart:io';
 
-import 'package:dateutil/src/tz/android/android_tz.dart';
-
 import 'package:jni/jni.dart';
 import 'package:path/path.dart';
 
+import 'utils/java/android_tz.dart';
 import 'utils/test_factory.dart';
 
 void main() {

@@ -1,7 +1,5 @@
 import 'package:meta/meta.dart';
-import 'factory_stub.dart'
-    if (dart.library.html) 'factory_web.dart'
-    if (dart.library.io) 'factory_io.dart';
+import 'universal/universal_tz.dart';
 
 @immutable
 @internal
@@ -37,7 +35,7 @@ abstract class Timezone {
     return result;
   }
 
-  static TimezoneFactory _factory = defaultFactory;
+  static TimezoneFactory _factory = UniversalTimezoneFactory();
   static final Map<String, Timezone> _cachedTimezones = {};
 
   @visibleForTesting
